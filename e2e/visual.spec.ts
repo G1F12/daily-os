@@ -7,7 +7,7 @@ import {join} from 'node:path';
 test('mobile visual baselines: ten key states',async({page,context},info)=>{
  test.skip(info.project.name!=='iphone-390','Three viewports are covered by interaction/overflow tests; visual reference uses 390 × 844.');
  const dir=await mkdtemp(join(tmpdir(),'daily-os-update-'));const server=await testServer('dist');
- try{await page.clock.setFixedTime(fixedTime);await page.goto(server.url);await page.evaluate(()=>navigator.serviceWorker.ready);await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);await weigh(page,'76.7');
+ try{await page.clock.setFixedTime(fixedTime);await page.goto(server.url);if(await page.getByTestId('opening').isVisible())await page.getByRole('button',{name:'Tap to continue',exact:true}).click();await page.evaluate(()=>navigator.serviceWorker.ready);await expect.poll(()=>page.evaluate(()=>!!navigator.serviceWorker.controller)).toBe(true);await weigh(page,'76.7');
  const snap=async(name:string)=>{await noOverflow(page);await expect(page).toHaveScreenshot(name+'.png',{fullPage:name!=='weight-modal'});};
  await tab(page,'Settings');await page.getByLabel('Appearance').selectOption('dark');await tab(page,'Today');await snap('today-dark');await tab(page,'Progress');await snap('progress-dark');
  await tab(page,'Settings');await page.getByLabel('Appearance').selectOption('light');await tab(page,'Today');await snap('today-light');await tab(page,'Progress');await snap('progress-light');await tab(page,'History');await snap('history');await tab(page,'Settings');await snap('settings');
