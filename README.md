@@ -16,9 +16,10 @@ npm run dev
 ```sh
 npm run check
 npm test
-npm run build
 npm run preview
 ```
+
+`npm test` builds the app before running the 24 checks, including offline-shell verification.
 
 The production build generates a versioned service worker and precaches the entire app shell. Development mode intentionally does not register a service worker.
 

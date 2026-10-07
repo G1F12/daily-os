@@ -26,10 +26,6 @@ Browser interaction testing of all four screens, task editor, file picker/downlo
 
 These have **not** been claimed as passing. The VM test verifies worker logic, not Safari runtime behavior. fake-indexeddb verifies persistence transactions, not a physical iPhone process restart.
 
-## Publishing blockers
+## Release status
 
-GitHub connection is authenticated as G1F12, but available connector operations do not include repository creation. The new repository has not been created or pushed.
-
-Vercel account GT (the account hosting gojo-toji-life-os), team `team_w0nvgQBrbwuSRseHZot7M4FC`, returned **403 forbidden** when creating project `daily-os`. No authorized local Vercel CLI session is present. No Vercel project or deployment was created.
-
-Next action: with user approval for browser fallback, create `G1F12/daily-os`, push the committed source, create/connect the Vercel project in the same account, deploy a test build, perform browser checks, release production, and smoke-test the production URL.
+Repository creation completed through the authorized GitHub browser session. Deployment and browser acceptance checks are in progress. This report will be updated after production verification.
