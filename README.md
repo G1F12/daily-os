@@ -21,7 +21,7 @@ npm test
 npm run preview
 ```
 
-`npm test` builds the app before running 56 checks (24 original + 32 v1.1), including offline-shell verification.
+`npm test` builds the app before running 89 checks (24 original + 32 v1.1 + 33 v1.2), including offline-shell verification.
 
 ## v1.1
 

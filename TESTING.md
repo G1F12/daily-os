@@ -122,4 +122,4 @@ Migration strategy: no IndexedDB version bump or database recreation. Optional g
 - v1.1 gzip baseline: JS 73.11 kB; CSS 4.68 kB.
 - v1.2 gzip: JS 79.61 kB; CSS 5.07 kB.
 - Physical iPhone Safari/standalone is not tested in this environment. Automated mobile Chromium tests do not replace real-device testing.
-- Preview and production smoke results: recorded after deployment.
+- Preview QA: PASS in the authenticated Vercel browser (Today/quote/Undo, same-day weight editing, Rest/Resume, Weight Goal, chart point/period, History snapshots, export/import v3, reload persistence and offline Ready). No application console errors observed; the browser extension emits unrelated metadata errors. Production smoke is run after promotion and reported in the release report.
