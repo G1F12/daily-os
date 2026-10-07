@@ -107,3 +107,19 @@ physical-device checks passed.
 
 GitHub main is connected to Vercel. v1.0.0 is live in Production, not only Preview.
 Test data used above remains only in the isolated test browser, never on a server.
+
+## v1.2 release verification
+
+Migration strategy: no IndexedDB version bump or database recreation. Optional goal/rest fields; identity migration checks old stored structure and never changes valid legacy fields. Backup envelope v3 accepts v1/v2/v3. Unit/integration coverage includes failed writes and malformed stored state without overwrite, plus rest-neutral streaks, gain/loss goals, date-pinned quotes, Warsaw midnight, analytics and cache-only cleanup.
+
+- TypeScript and production build: PASS.
+- Original/v1.1 tests: 56 PASS (export-version expectations updated to the new supported envelope).
+- New unit/integration checks: 33 PASS; total 89/89.
+- Mobile E2E: 24/24 PASS across three viewports. Visual regression: 10/10 image comparisons PASS (one test), reviewed reference plus repeat run.
+- Real legacy upgrade test: v1.1 production shell → v1.2 worker, byte-equivalent tasks/days/measurements/settings before/after, cached prior assets, offline reopening.
+- Visual reference: 10 light/dark/dialog/complete/rest/update states at 390×844, 1.5% differing-pixel tolerance. All three viewports test interactions and overflow.
+- Runtime dependencies unchanged (React/React DOM); Playwright dev only.
+- v1.1 gzip baseline: JS 73.11 kB; CSS 4.68 kB.
+- v1.2 gzip: JS 79.61 kB; CSS 5.07 kB.
+- Physical iPhone Safari/standalone is not tested in this environment. Automated mobile Chromium tests do not replace real-device testing.
+- Preview and production smoke results: recorded after deployment.
