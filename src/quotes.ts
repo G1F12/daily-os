@@ -1,5 +1,6 @@
-import { localDate } from './model';
-export interface Quote { id:string; text:string; author:string; category:string; type:'reflection'|'quote'; source?:string }
+import { localDate, type QuoteRecord } from './model';
+import { realReflections, jjkReflections, otherReflections } from './reflections';
+export interface Quote { id:string; text:string; author:string; category:string; type:'reflection'|'quote'; source?:string; universe?:string; visualCategory?:string }
 // These are original editorial reflections inspired by each person's themes,
 // NOT verbatim statements or claimed paraphrases of a particular passage.
 // Append only; never repurpose an ID. Fictional entries are clearly labelled too.
@@ -60,16 +61,43 @@ const groups:[string,string,string[]][] = [
 export const quotes:readonly Quote[]=groups.flatMap(([author,category,texts],g)=>texts.map((text,i)=>({id:`q-${g+1}-${i+1}`,text,author,category,type:'reflection' as const})));
 // One verified short literal entry; editorial entries above are explicitly labelled.
 export const verifiedQuotes:readonly Quote[]=[{id:'jobs-2005-1',text:'You’ve got to find what you love.',author:'Steve Jobs',category:'leadership',type:'quote',source:'Stanford commencement address, June 12, 2005'}];
-export const quotePool:readonly Quote[]=[...quotes,...verifiedQuotes];
-export function quoteForDate(date=localDate(),pool=quotePool){const day=Math.floor(Date.parse(date+'T12:00:00Z')/86400000);return pool[((day+71)%pool.length+pool.length)%pool.length];}
+const makeEntries=(groups:[string,string,string][],prefix:string,fictional=false,jjk=false)=>groups.flatMap(([author,category,lines],g)=>lines.split('\n').map((text,i)=>({id:`${prefix}-${g+1}-${i+1}`,text,author,category:jjk?'JJK':fictional?'fictional':category,type:'reflection' as const,visualCategory:fictional?category:category==='science'?'science':category==='philosophy'?'roman':author==='Miyamoto Musashi'?'warrior':'garden',...(jjk?{universe:'Jujutsu Kaisen'}:{})})));
+const legacy=quotes.map(q=>({...q,...(['Satoru Gojo','Toji Fushiguro','Sukuna'].includes(q.author)?{universe:'Jujutsu Kaisen',visualCategory:q.author==='Satoru Gojo'?'infinity':q.author==='Sukuna'?'shrine':'hunter'}:{})}));
+export const quotePool:readonly Quote[]=[...legacy,...verifiedQuotes,...makeEntries(realReflections,'real'),...makeEntries(jjkReflections,'jjk',true,true),...makeEntries(otherReflections,'fiction',true)];
+export const visualThemes=['roman','science','warrior','garden','infinity','hunter','shrine','energy','shadows','moon','gold','night','violet','neon','electric'];
+export const visuals=visualThemes.flatMap(t=>[1,2,3,4].map(i=>`${t}-${i}`));
+export function visualForQuote(q:Quote){const theme=q.visualCategory??(q.category==='science'?'science':q.author==='Miyamoto Musashi'?'warrior':q.category==='philosophy'?'roman':'garden');return `${theme}-${hash(q.id)%4+1}`;}
+export function visualPath(id:string){return `/openings/${visuals.includes(id)?id:'garden-1'}.svg`;}
+function hash(text:string){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
+function random(seed:number){return ()=>{seed+=0x6D2B79F5;let t=seed;t=Math.imul(t^t>>>15,t|1);t^=t+Math.imul(t^t>>>7,t|61);return ((t^t>>>14)>>>0)/4294967296;};}
+const authorKey=(q:Quote)=>q.author==='Sukuna'?'Ryomen Sukuna':q.author;
+const cycles=new Map<number,Quote[]>();
+function permutation(cycle:number,pool:readonly Quote[],previous:Quote[]=[]){
+ for(let attempt=0;attempt<128;attempt++){
+  const rng=random(hash(`daily-os-rotation-v2:${cycle}:${attempt}`)),bag=[...pool];
+  for(let i=bag.length-1;i>0;i--){const j=Math.floor(rng()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}
+  const result:Quote[]=[],recent=previous.slice(-7).map(authorKey);let failed=false;
+  while(bag.length){const index=bag.findIndex(q=>!recent.includes(authorKey(q)));if(index<0){failed=true;break;}const q=bag.splice(index,1)[0];result.push(q);recent.push(authorKey(q));if(recent.length>7)recent.shift();}
+  if(!failed&&result.slice(0,7).every((q,i)=>!result.slice(result.length-7+i).some(last=>authorKey(last)===authorKey(q))))return result;
+ }
+ // Tiny custom pools cannot always satisfy a seven-day author separation.
+ const rng=random(hash(`daily-os-fallback:${cycle}`));return [...pool].map(q=>({q,n:rng()})).sort((a,b)=>a.n-b.n).map(x=>x.q);
+}
+
+export function quoteForDate(date=localDate(),pool=quotePool){
+ const ordinal=Math.floor((Date.parse(date+'T12:00:00Z')-Date.parse('2000-01-01T12:00:00Z'))/86400000),cycle=Math.floor(ordinal/pool.length),offset=((ordinal%pool.length)+pool.length)%pool.length;
+ if(pool!==quotePool||cycle<0)return permutation(cycle,pool)[offset];
+ if(!cycles.has(0))cycles.set(0,permutation(0,pool));
+ return cycles.get(0)![offset];
+}
 let memory:{date:string;id:string}|undefined;
-export function dailyQuote(date=localDate()):Quote{
- let pinned=memory;
- try{const raw=localStorage.getItem('daily-os-quote-v1');if(raw)pinned=JSON.parse(raw);}catch{/* unavailable storage: deterministic fallback */}
- const existing=pinned?.date===date?quotePool.find(q=>q.id===pinned!.id):undefined;
- const q=existing??quoteForDate(date);memory={date,id:q.id};
- try{localStorage.setItem('daily-os-quote-v1',JSON.stringify(memory));}catch{/* offline/private-storage fallback */}
+export function dailyQuote(date=localDate(),history?:Record<string,QuoteRecord>):Quote{
+ let pinned=memory;try{const raw=localStorage.getItem('daily-os-quote-v1');if(raw)pinned=JSON.parse(raw);}catch{}
+ const id=history?.[date]?.quoteId??(pinned?.date===date?pinned.id:undefined);
+ const q=quotePool.find(q=>q.id===id)??quoteForDate(date);memory={date,id:q.id};
+ try{localStorage.setItem('daily-os-quote-v1',JSON.stringify(memory));}catch{}
  return q;
 }
-export function quoteShareText(q:Quote){return `${q.type==='quote'?`“${q.text}”`:q.text}\n— ${q.type==='reflection'?'Inspired by ':''}${q.author}${q.type==='reflection'?' (original reflection)':''}\nDAILY OS`;}
+export function quoteRecord(date:string,history?:Record<string,QuoteRecord>){const q=dailyQuote(date,history);return {quoteId:q.id,visualId:history?.[date]?.visualId&&visuals.includes(history[date].visualId)?history[date].visualId:visualForQuote(q)};}
+export function quoteShareText(q:Quote){return `${q.type==='quote'?`“${q.text}”`:q.text}\n— ${q.type==='reflection'?'Inspired by ':''}${q.author}${q.type==='reflection'?' (original reflection)':''}${q.universe?' · '+q.universe:''}\nDAILY OS`;}
 export async function shareQuote(q:Quote,api:{share?:(data:{text:string})=>Promise<void>;clipboard?:{writeText:(text:string)=>Promise<void>}}=navigator){const text=quoteShareText(q);if(api.share){try{await api.share({text});return 'shared' as const;}catch(e){if(e instanceof DOMException&&e.name==='AbortError')return 'cancelled' as const;}}if(api.clipboard){await api.clipboard.writeText(text);return 'copied' as const;}return 'manual' as const;}
