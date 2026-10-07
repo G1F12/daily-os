@@ -88,3 +88,19 @@ npm run test:e2e
 ```
 
 The legacy fixture builds the exact v1.1 production commit `4663288501e1a65efb048fffd810d0fdac759626`. Three mobile viewports (390×844, 393×852, 430×932) cover interactions, no overflow, persistence and offline reopening. Ten reviewed visual baselines use 390×844. Use `npm run test:visual -- --project=iphone-390 --update-snapshots` only after reviewing intentional UI changes. Screenshots are Linux Chromium references; font/browser differences may require a reviewed baseline refresh. `DAILY_OS_TEST_URL` runs interaction smoke tests against a deployed preview/production without starting the local server. Tests use isolated browser profiles and synthetic records. Playwright is a dev dependency and never ships to users. No physical iPhone test is claimed.
+
+## v1.3.0 implementation (release pending)
+
+Money adds PLN cashflow with integer grosz amounts, separate starting balance, editable income/expenses, confirmation before deletion, Add/Delete Undo, monthly totals and compact category bars. All writes reuse the existing atomic IndexedDB transaction. Database/store/state-schema versions remain 1. Additive migration initialises empty Money and quote history without modifying legacy snapshots, weights, goals, settings or Rest Days. Backup export is v4; imports accept envelopes v1–v4 and legacy raw states.
+
+The curated pool is 683 entries: 164 JJK-related, including 40 Gojo, 212 fictional total (31.04%) and 471 real-person reflections/quotes (68.96%). New entries are original editorial reflections and explicitly labelled **Inspired by**; they are not claimed character/person statements. The existing short verified Jobs quotation retains its source metadata. Seeded Fisher–Yates permutations are filtered to keep an author out of the previous seven days, including cycle boundaries; Sukuna aliases share one author key. Each complete cycle uses every ID exactly once. Date/history pins preserve selected IDs and visuals after updates, and the v1.2 same-day localStorage pin is migrated into IndexedDB. Missing IDs/assets have deterministic fallbacks.
+
+Opening is claimed atomically once per Warsaw calendar day, after database load, with the same quote as Today. It auto-closes after 2.8 seconds or immediately on Tap to continue. A 180 ms fade is removed for reduced motion. The current visual is decoded before presentation; the worker precaches all 52 original compact SVG assets (40,198 bytes total, no external references), guaranteeing future offline openings after offline setup completes. No new library/backend/authentication is shipped.
+
+### v1.3 QA
+
+`npm test` passes 137 unit/integration tests; TypeScript and production build pass. Browser QA is **pending**, not passed: the available local Chromium hangs in this execution environment; GitHub API writes and Vercel preview/Sandbox creation returned permission errors. See `QA_REPORT_V1.3.md` for precise status. No production release or physical iPhone testing is claimed.
+
+`npm run test:legacy` now builds exact production v1.2 SHA `68fcd44cc5fdd70411b98b0be93f21284bd7585f`. The E2E upgrade tests compare all legacy fields and verify empty additive Money. Six new snapshot scenarios are defined. Existing v1.2 screenshots remain unchanged; the comparator masks only the intentional five-tab navigation and v1.3 version labels, and checks every other pixel with the established 1.5% tolerance. New Money screenshots cover the actual new navigation.
+
+The GitHub Actions workflow runs build/unit tests, the legacy fixture, mobile scenarios and visual comparison. Missing new references must be reviewed and committed before release; the first run generates them as artifacts. Do not regenerate existing v1.2 references.
