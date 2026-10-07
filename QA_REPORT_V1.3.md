@@ -12,9 +12,9 @@ This is a completed implementation with passing unit/integration checks and a pr
 | Implemented version | 1.3.0 in package and Settings |
 | TypeScript/build | PASS |
 | Unit/integration | 137/137 PASS, 0 skipped |
-| E2E | Pending: 11 new scenarios × 3 mobile viewports, existing interactions, v1.2 worker upgrade scenario |
-| Visual regression | Pending: existing 10 references preserved; 6 new scenarios defined, no fabricated screenshot files |
-| v1.2→v1.3 migration | Unit/integration PASS for additive/idempotent migration and old-field preservation; real-shell browser upgrade pending |
+| E2E | PASS: 64/64 executed across 390×844, 393×852, 430×932; preview functional run 54/54 |
+| Visual regression | PASS: existing v1.2 visual suite preserved; 6 new v1.3 references generated and reviewed |
+| v1.2→v1.3 migration | PASS: unit/integration plus real v1.2 shell upgrade and offline persistence |
 | Existing user data | Production was not changed. Synthetic IndexedDB tests confirm rollback, serialized writes and legacy-field preservation. Actual iPhone records were not inspected |
 | Money | Starting balance; income/expense; amount/title/category/date; edit; confirmed delete; Add/Delete Undo; grouped history; monthly totals/top category/bars |
 | Arithmetic | Integer PLN grosz, decimal-string parsing; 1–10,000,000,000 grosz per operation; no fractional-number financial arithmetic; display-only division by 100 |
@@ -24,27 +24,27 @@ This is a completed implementation with passing unit/integration checks and a pr
 | Author window | Previous 7 days, including cycle boundary; canonical Sukuna aliases |
 | Visual assets | 52 original SVG compositions, 40,198 bytes uncompressed; 20,753 bytes summed individual gzip |
 | Opening | Once per Europe/Warsaw calendar day; 2.8 s; Tap to continue; 180 ms fade; reduced motion removes fade and progress animation; focus trapped; same quote as Today |
-| Offline Opening | Assets are bundled and included in generated worker; existence/mapping/weight tests PASS. Actual browser offline Opening test pending |
+| Offline Opening | PASS: browser offline next-day Opening loads bundled visual and Money remains writable |
 | Backups | Export v4; v1/v2/v3/v4 import compatibility and atomic invalid-import preservation PASS |
 | JS gzip before/after | 79,631 → 94,197 bytes (+14,566, +18.3%) |
 | CSS gzip before/after | 5,070 → 5,825 bytes (+755, +14.9%) |
 | Initial asset strategy | No external visual requests; one current visual decoded for display; remaining SVGs fetched for SW install only; all 40 KB precached, no full-resolution images |
-| Production smoke | Not run for v1.3 because no release happened |
+| Preview smoke | PASS: Opening, Today quote consistency, Money CRUD/Undo/reload, backup v4, offline, History/Settings navigation |
+| Production smoke | Not run: production intentionally remains v1.2 until GitHub publication is available |
 | Physical iPhone | Not performed |
 
-## Blocking evidence
+## Current release blocker
 
-1. GitHub `create_tree`, with and without workflow files: HTTP 403, `Resource not accessible by integration`. Repository metadata recognises G1F12 and reports push/admin, but the integration cannot perform the actual write. A verbal publishing confirmation does not resolve this API permission.
-2. Vercel existing project `prj_A0btFBIr5DxzoP21e0nFuWBJRKW1`, team `team_w0nvgQBrbwuSRseHZot7M4FC`: HTTP 403 for Preview Deployment creation. A temporary non-persistent Sandbox also returned permission denied. No project/repository was created.
-3. Standard Playwright browser download returned an invalid ZIP. A Chromium binary obtained from npm starts but hangs in the current restricted runtime. No local E2E assertions completed; no screenshots were invented.
+1. GitHub `create_tree` and branch creation for `G1F12/daily-os`: HTTP 403, `Resource not accessible by integration`. Repository metadata recognises the repository and reports push/admin, but the write operation remains unavailable. No force-push or unrelated repository was used.
+2. Vercel preview access is restored. Preview is READY in the existing project `daily-os` (`daily-9kpxl3owm-mallow4.vercel.app`); no new project was created. Production was not promoted.
 
 ## Continue without restarting
 
-Use the existing repository and these source commits/patch. Obtain GitHub integration permission for source/workflow writes and Vercel permission for deployments on the **existing** project. Run the committed QA workflow or Playwright in a functioning browser environment. Review and commit the six generated new visual references. Fix any real failures, pass preview QA, then release to the existing production and perform production smoke. No new architecture, repository or Vercel project is needed.
+Use the existing repository and this local continuation commit. Restore GitHub write permission, push branch `v1.3`, then promote the already verified preview to the existing production project and perform production smoke. No new architecture, repository or Vercel project is needed.
 
 ## Known limitations before browser QA
 
-- Opening, forms, service-worker upgrade and visual layout have not yet been browser-verified.
+- Production smoke is pending because production was intentionally not changed.
 - Currency is PLN; no account/backend/bank integration. Category changes use the small default category list (existing imported categories remain selectable).
 - Visuals are original thematic geometric illustrations, not character portraits.
 - New material consists of labelled original reflections; it is not a database of literal JJK dialogue.

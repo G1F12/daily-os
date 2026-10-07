@@ -99,8 +99,8 @@ Opening is claimed atomically once per Warsaw calendar day, after database load,
 
 ### v1.3 QA
 
-`npm test` passes 137 unit/integration tests; TypeScript and production build pass. Browser QA is **pending**, not passed: the available local Chromium hangs in this execution environment; GitHub API writes and Vercel preview/Sandbox creation returned permission errors. See `QA_REPORT_V1.3.md` for precise status. No production release or physical iPhone testing is claimed.
+`npm test` passes 137 unit/integration tests; TypeScript and production build pass. Browser QA has now passed in the existing Vercel preview and a compatible Chromium sandbox: 64/64 local E2E declarations executed across 390×844, 393×852 and 430×932, plus 54/54 preview scenarios. This is synthetic Chromium QA, not physical iPhone testing. GitHub publication remains blocked by the connector's 403 write response; production was not changed.
 
-`npm run test:legacy` now builds exact production v1.2 SHA `68fcd44cc5fdd70411b98b0be93f21284bd7585f`. The E2E upgrade tests compare all legacy fields and verify empty additive Money. Six new snapshot scenarios are defined. Existing v1.2 screenshots remain unchanged; the comparator masks only the intentional five-tab navigation and v1.3 version labels, and checks every other pixel with the established 1.5% tolerance. New Money screenshots cover the actual new navigation.
+`npm run test:legacy` builds exact production v1.2 SHA `68fcd44cc5fdd70411b98b0be93f21284bd7585f`. The E2E upgrade tests compare all legacy fields and verify empty additive Money. Six new snapshot scenarios were generated and reviewed. Existing v1.2 screenshots remain unchanged; the comparator masks only the intentional five-tab navigation and v1.3 version labels, and checks every other pixel with the established 1.5% tolerance. New Money screenshots cover the actual new navigation.
 
 The GitHub Actions workflow runs build/unit tests, the legacy fixture, mobile scenarios and visual comparison. Missing new references must be reviewed and committed before release; the first run generates them as artifacts. Do not regenerate existing v1.2 references.
