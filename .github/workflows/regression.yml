@@ -4,11 +4,16 @@ on:
     branches: [main, v1.3]
   pull_request:
   workflow_dispatch:
+    inputs:
+      review_visuals:
+        description: Generate candidate visual baselines for human review
+        type: boolean
+        default: false
 permissions:
   contents: read
 jobs:
   verify:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
@@ -20,8 +25,12 @@ jobs:
           cache: npm
       - run: npm ci
       - run: npm run check && npm test && npm run test:legacy
-      - run: npx playwright install --with-deps chromium
+      - run: npx playwright install chromium
+      - name: Generate candidate visual baselines
+        if: inputs.review_visuals == true
+        run: npx playwright test visual.spec.ts --project=iphone-390 --update-snapshots
       - run: npm run test:e2e
+        if: inputs.review_visuals != true
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -29,4 +38,5 @@ jobs:
           path: |
             test-results/
             playwright-report/
+            e2e/*-snapshots/
           retention-days: 7
