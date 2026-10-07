@@ -1,0 +1,6 @@
+import http from 'node:http';
+import {readFile} from 'node:fs/promises';
+import {resolve,extname} from 'node:path';
+// Test infrastructure only; never included in the offline production application.
+export function testServer(initialRoot,port=0){let root=resolve(initialRoot);const server=http.createServer(async(req,res)=>{try{let path=decodeURIComponent(new URL(req.url,'http://localhost').pathname);if(path==='/')path='/index.html';const file=resolve(root,'.'+path);if(!file.startsWith(root+'/'))throw new Error('Invalid path');const body=await readFile(file);res.writeHead(200,{'Content-Type':({'.html':'text/html','.js':'application/javascript','.css':'text/css','.json':'application/json','.png':'image/png','.svg':'image/svg+xml'})[extname(file)]||'application/octet-stream','Cache-Control':'no-store'});res.end(body);}catch{res.writeHead(404);res.end('Not found');}});return new Promise(resolveServer=>server.listen(port,'127.0.0.1',()=>resolveServer({url:`http://127.0.0.1:${server.address().port}`,setRoot:path=>{root=resolve(path)},close:()=>new Promise(done=>server.close(done))})));}
+if(process.argv[1]?.endsWith('test-server.mjs')){const s=await testServer('dist',4173);console.log(s.url);}

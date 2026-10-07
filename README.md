@@ -21,7 +21,7 @@ npm test
 npm run preview
 ```
 
-`npm test` builds the app before running 56 checks (24 original + 32 v1.1), including offline-shell verification.
+`npm test` builds the app before running 89 checks (24 original + 32 v1.1 + 33 v1.2), including offline-shell verification.
 
 ## v1.1
 
@@ -62,3 +62,29 @@ Includes install manifest, PNG icons, Apple metadata, safe-area insets, dark/lig
 ## Deploy
 
 Connect this repository to Vercel. Framework: Vite. Build: `npm run build`. Output: `dist`. No environment variables are needed. Deploy main to production. No server routes are required.
+
+## v1.2.0
+
+Adds a compact offline daily reflection/quote with Share/Copy, intentional Rest Days, optional gain/loss weight goals, 6M/1Y weight views and 7/30/90-day completion analytics. Rest days preserve task/weight records, neither increase nor break streaks, and are excluded from task denominators. Resume restores the original day. Perfect days count complete, non-rest snapshots. Consistency is ordinary task completion; unrecorded dates are not invented.
+
+### Quotes and attribution
+
+The local pool has 153 entries: 152 original editorial reflections **inspired by** themes associated with 20 real people and six fictional characters, plus one short verified Steve Jobs quotation from his [2005 Stanford address](https://news.stanford.edu/stories/2005/06/youve-got-find-love-jobs-says). Reflections are explicitly labelled as original, not literal quotations, both in UI and shared text. Categories include philosophy, science, sport, practice, leadership, writing and fictional characters; fictional entries are 12/153, including Satoru Gojo. No quote API, network request or runtime AI. A deterministic date ordinal selects an entry in Europe/Warsaw; a versioned localStorage date/ID pin preserves today's selection across reloads and future append-only pool updates. IDs and text must remain stable. The selection cycles after 153 days.
+
+### Data compatibility and update safety
+
+IndexedDB remains `daily-os`, version **1**, store `state`, key `main`, state schema **1**. There is no database deletion, upgrade transaction or destructive migration. Optional `DailyRecord.restDay` and `Settings.weightGoal` are additive. Legacy records remain unchanged until an intentional user action. Stored structure is checked before mutation; unreadable state is not overwritten. Streaks remain derived from snapshots. Export uses envelope version **3**; imports accept v1/v2/v3 and legacy raw states. Goal baselines, enabled state and Rest Days round-trip; validation and single-transaction rollback preserve previous records on failure.
+
+A new worker precaches the complete shell before activation, waits for **Reload** or dismissal with **Later**, and checks on resume. Activation retains the previous shell's hashed JS/CSS for already open tabs, then deletes only old `daily-os-*` static caches. It never accesses or clears IndexedDB. Updates require an online visit; daily features remain offline.
+
+### Browser regression tests
+
+```sh
+npm ci
+npx playwright install --with-deps chromium
+npm test
+npm run test:legacy
+npm run test:e2e
+```
+
+The legacy fixture builds the exact v1.1 production commit `4663288501e1a65efb048fffd810d0fdac759626`. Three mobile viewports (390×844, 393×852, 430×932) cover interactions, no overflow, persistence and offline reopening. Ten reviewed visual baselines use 390×844. Use `npm run test:visual -- --project=iphone-390 --update-snapshots` only after reviewing intentional UI changes. Screenshots are Linux Chromium references; font/browser differences may require a reviewed baseline refresh. `DAILY_OS_TEST_URL` runs interaction smoke tests against a deployed preview/production without starting the local server. Tests use isolated browser profiles and synthetic records. Playwright is a dev dependency and never ships to users. No physical iPhone test is claimed.
