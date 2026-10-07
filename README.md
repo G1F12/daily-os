@@ -88,3 +88,15 @@ npm run test:e2e
 ```
 
 The legacy fixture builds the exact v1.1 production commit `4663288501e1a65efb048fffd810d0fdac759626`. Three mobile viewports (390×844, 393×852, 430×932) cover interactions, no overflow, persistence and offline reopening. Ten reviewed visual baselines use 390×844. Use `npm run test:visual -- --project=iphone-390 --update-snapshots` only after reviewing intentional UI changes. Screenshots are Linux Chromium references; font/browser differences may require a reviewed baseline refresh. `DAILY_OS_TEST_URL` runs interaction smoke tests against a deployed preview/production without starting the local server. Tests use isolated browser profiles and synthetic records. Playwright is a dev dependency and never ships to users. No physical iPhone test is claimed.
+
+## v1.3.0
+
+Money is a simple PLN cashflow tab: separate starting balance, income/expenses, editable dated transactions, deletion confirmation/Undo, monthly totals and category bars. All financial arithmetic uses integer grosz (`2490` = 24.90 PLN). Input accepts a dot or comma; transactions are positive and capped at 100,000,000 PLN. No banking, payments or financial advice.
+
+A daily Opening Moment uses the same quote as Today, lasts 2.8 seconds and can be skipped immediately. Reduced motion closes it quickly. An atomic `lastOpeningDate` claim in the existing IndexedDB prevents repeated openings on reload or in concurrent tabs. Decorative opening never hides a storage load error. Daily quote IDs/visual IDs now live in small persistent history records; the v1.2 localStorage date pin is retained during upgrade.
+
+The append-only pool contains 629 entries: 628 clearly labelled original editorial reflections and the existing short sourced Steve Jobs quote. 162 entries relate to Jujutsu Kaisen, including 38 Gojo entries. Fictional entries total 208/629 (33.1%); JJK is 25.8%. The v2 engine uses a seeded shuffled circular permutation of IDs, repairs author spacing and treats Sukuna's two name variants as one character. A full cycle lasts 629 days with no repeated entry and at least seven days between the same author/character. Stored daily records override future pool rotations. These original reflections are not claimed to be literal statements by the people or characters.
+
+60 original SVG artworks cover philosophy, science, practice and character-compatible symbolic themes. Total source artwork is approximately 52 kB. They use no anime frames, manga panels, official character artwork or external image URLs. All are precached so even tomorrow's opening works offline; only the selected artwork is rendered. SVG is appropriate for these vector compositions and avoids raster overhead.
+
+Database name/version/store remain unchanged. Optional additive Money, quoteHistory and lastOpeningDate fields preserve the old state. Backup envelope v4 accepts v1/v2/v3/v4, includes all new records, validates integer financial values and uses the existing atomic restore transaction. Migration is idempotent; corrupt Money is reported rather than silently reset. GitHub Actions runs production/unit tests, real legacy upgrade fixtures and mobile browser regression.
