@@ -53,7 +53,7 @@ Each day freezes its scheduled task snapshot when created. **Routine and trainin
 
 The current streak includes today if complete, otherwise consecutive completed days ending yesterday. A missed full day breaks it. Best streak is recomputed from history. Weekly task completion includes elapsed days only; completed days use the full Monday–Sunday week out of 7.
 
-Weights are unique per calendar date; editing replaces that date’s value. Weight is stored as a typed measurement (`kind`, `value`, `unit`) so other body measurements can be added later. The 7-day average uses only recorded values in the last 7 calendar days; missing dates are not interpolated. Changes compare the latest weigh-in with the exact reference dates. The SVG chart shows the last 30 entries with calendar-spaced points.
+Weights are unique per calendar date; editing replaces that date’s value. Weight is stored as a typed measurement (`kind`, `value`, `unit`) so other body measurements can be added later. The 7-day average uses only recorded values in the last 7 calendar days; missing dates are not interpolated. Changes compare the latest weigh-in with the exact reference dates. The SVG chart filters 7D / 30D / 90D / ALL by calendar date, with measured points and no estimated entries.
 
 ## PWA and updates
 
