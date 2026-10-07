@@ -1,4 +1,4 @@
-# DAILY OS v1.3 implementation — release blocked
+# DAILY OS v1.3 implementation — preview QA complete, release blocked
 
 Date: 2026-10-07. Authoritative parent: production v1.2.0, commit `68fcd44cc5fdd70411b98b0be93f21284bd7585f` in `G1F12/daily-os`.
 
@@ -42,7 +42,7 @@ This is a completed implementation with passing unit/integration checks and a pr
 
 Use the existing repository and this local continuation commit. Restore GitHub write permission, push branch `v1.3`, then promote the already verified preview to the existing production project and perform production smoke. No new architecture, repository or Vercel project is needed.
 
-## Known limitations before browser QA
+## Known limitations before production release
 
 - Production smoke is pending because production was intentionally not changed.
 - Currency is PLN; no account/backend/bank integration. Category changes use the small default category list (existing imported categories remain selectable).
