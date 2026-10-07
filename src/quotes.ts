@@ -1,5 +1,7 @@
-import { localDate } from './model';
-export interface Quote { id:string; text:string; author:string; category:string; type:'reflection'|'quote'; source?:string }
+import { localDate, type State } from './model';
+import { jjkGroups, realGroups, fictionalGroups } from './quote-additions';
+import { visualFor, visualExists } from './visuals';
+export interface Quote { id:string; text:string; author:string; category:string; type:'reflection'|'quote'; source?:string; universe?:string; visualCategory?:string }
 // These are original editorial reflections inspired by each person's themes,
 // NOT verbatim statements or claimed paraphrases of a particular passage.
 // Append only; never repurpose an ID. Fictional entries are clearly labelled too.
@@ -60,8 +62,31 @@ const groups:[string,string,string[]][] = [
 export const quotes:readonly Quote[]=groups.flatMap(([author,category,texts],g)=>texts.map((text,i)=>({id:`q-${g+1}-${i+1}`,text,author,category,type:'reflection' as const})));
 // One verified short literal entry; editorial entries above are explicitly labelled.
 export const verifiedQuotes:readonly Quote[]=[{id:'jobs-2005-1',text:'You’ve got to find what you love.',author:'Steve Jobs',category:'leadership',type:'quote',source:'Stanford commencement address, June 12, 2005'}];
-export const quotePool:readonly Quote[]=[...quotes,...verifiedQuotes];
-export function quoteForDate(date=localDate(),pool=quotePool){const day=Math.floor(Date.parse(date+'T12:00:00Z')/86400000);return pool[((day+71)%pool.length+pool.length)%pool.length];}
+const legacyJJK=new Set(['Satoru Gojo','Toji Fushiguro','Sukuna']);
+export const quotePool:Quote[]=[...quotes.map(q=>({...q,...(legacyJJK.has(q.author)?{universe:'Jujutsu Kaisen',category:'JJK',visualCategory:q.author==='Satoru Gojo'?'gojo':q.author==='Toji Fushiguro'?'toji':'sukuna'}:{})})),...verifiedQuotes,
+ ...realGroups.flatMap(([author,category,texts],g)=>texts.map((text,i)=>({id:`real-v2-${g}-${i}`,text,author,category,type:'reflection' as const}))),
+ ...jjkGroups.flatMap(([author,visualCategory,texts],g)=>texts.map((text,i)=>({id:`jjk-v2-${g}-${i}`,text,author,category:'JJK',universe:'Jujutsu Kaisen',visualCategory,type:'reflection' as const}))),
+ ...fictionalGroups.flatMap(([author,visualCategory,texts],g)=>texts.map((text,i)=>({id:`fiction-v2-${g}-${i}`,text,author,category:'fictional',visualCategory,type:'reflection' as const})))];
+export const AUTHOR_WINDOW=7;
+function hash(text:string){let h=2166136261;for(const c of text)h=Math.imul(h^c.charCodeAt(0),16777619);return h>>>0;}
+function rng(seed:number){return ()=>{seed|=0;seed=seed+0x6D2B79F5|0;let t=Math.imul(seed^seed>>>15,1|seed);t^=t+Math.imul(t^t>>>7,61|t);return ((t^t>>>14)>>>0)/4294967296;};}
+function authorKey(q:Quote){return q.author==='Sukuna'?'Ryomen Sukuna':q.author;}
+let schedules:{key:string;cycles:Quote[][]}|undefined;
+function cycle(pool:readonly Quote[],index:number,previous:Quote[]){const window=Math.min(AUTHOR_WINDOW,new Set(pool.map(authorKey)).size-1);
+ for(let attempt=0;attempt<1000;attempt++){const random=rng(hash(`daily-os-quotes-v2:${index}:${attempt}`)),pending=[...pool],out:Quote[]=[],recent=previous.slice(-window).map(authorKey);
+  for(let i=pending.length-1;i>0;i--){const j=Math.floor(random()*(i+1));[pending[i],pending[j]]=[pending[j],pending[i]];}
+  while(pending.length){const at=pending.findIndex(q=>!recent.includes(authorKey(q)));if(at<0)break;const q=pending.splice(at,1)[0];out.push(q);recent.push(authorKey(q));if(recent.length>window)recent.shift();}
+  if(!pending.length)return out;
+ }
+ throw new Error('Quote schedule could not satisfy the author window.');
+}
+export function quoteForDate(date=localDate(),pool:readonly Quote[]=quotePool){if(!pool.length)throw new Error('Quote pool is empty.');const day=Math.floor((Date.parse(date+'T12:00:00Z')-Date.parse('2000-01-01T12:00:00Z'))/86400000);const offset=Math.max(0,day),n=Math.floor(offset/pool.length),key=pool.map(q=>q.id).join('|');
+ if(schedules?.key!==key)schedules={key,cycles:[]};while(schedules.cycles.length<=n){const i=schedules.cycles.length;schedules.cycles.push(cycle(pool,i,schedules.cycles[i-1]??[]));}return schedules.cycles[n][offset%pool.length];}
+export function pinnedQuote(s:State,date=localDate()){const pin=s.quoteHistory?.[date];return (pin&&quotePool.find(q=>q.id===pin.quoteId))||quoteForDate(date);}
+export function prepareQuote(s:State,date=localDate(),legacy?:{date:string;id:string}){s.quoteHistory??={};if(!s.quoteHistory[date]){const q=(legacy?.date===date&&quotePool.find(q=>q.id===legacy.id))||quoteForDate(date);s.quoteHistory[date]={quoteId:q.id,visualId:visualFor(q)};}return s;}
+export function quoteVisual(s:State,date=localDate()){const pin=s.quoteHistory?.[date];return pin&&visualExists(pin.visualId)?pin.visualId:visualFor(pinnedQuote(s,date));}
+// The claim occurs within the same IndexedDB transaction as the history pin.
+export function claimOpening(s:State,date=localDate(),legacy?:{date:string;id:string}):{state:State;show:boolean}{prepareQuote(s,date,legacy);const show=s.lastOpeningDate!==date;s.lastOpeningDate=date;return {state:s,show};}
 let memory:{date:string;id:string}|undefined;
 export function dailyQuote(date=localDate()):Quote{
  let pinned=memory;

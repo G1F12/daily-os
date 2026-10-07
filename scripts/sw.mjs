@@ -1,6 +1,6 @@
 import {readFileSync,writeFileSync,readdirSync} from 'node:fs';
 import {createHash} from 'node:crypto';
-const files=['/','/index.html','/manifest.json','/icon.svg','/icon-192.png','/icon-512.png',...readdirSync('dist/assets').map(f=>'/assets/'+f)];
+const files=['/','/index.html','/manifest.json','/icon.svg','/icon-192.png','/icon-512.png',...readdirSync('dist/visuals').map(f=>'/visuals/'+f),...readdirSync('dist/assets').map(f=>'/assets/'+f)];
 const version=createHash('sha256').update(files.map(f=>readFileSync('dist'+(f==='/'?'/index.html':f))).join('')).digest('hex').slice(0,12);
 writeFileSync('dist/sw.js',`const CACHE='daily-os-${version}'; const FILES=${JSON.stringify(files)};
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(FILES))));
