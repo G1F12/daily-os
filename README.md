@@ -21,7 +21,15 @@ npm test
 npm run preview
 ```
 
-`npm test` builds the app before running the 24 checks, including offline-shell verification.
+`npm test` builds the app before running 56 checks (24 original + 32 v1.1), including offline-shell verification.
+
+## v1.1
+
+Today shows last weight, yesterday delta or the preceding seven-day average. Checkbox changes have a six-second Undo. Progress adds weekly task totals, a 30-day completion calendar and weight charts for 7D / 30D / 90D / ALL, with measured points and a period-average line. History separates completed and incomplete snapshot tasks.
+
+Database `daily-os`, database version 1 and state schema 1 are retained. Migration is additive and idempotent: existing tasks, snapshots, weights, settings and derived streaks remain intact. Export envelope version 2 adds a last-export timestamp; imports accept v1 and v2 envelopes plus legacy raw states. Restore keeps a temporary in-memory copy and uses one atomic transaction. Validation failures or aborted writes retain the previous committed data.
+
+Settings reports storage, offline readiness, app version 1.1.0 and last backup. Updates check again on resume and expose Reload when the new service worker is waiting.
 
 The production build generates a versioned service worker and precaches the entire app shell. Development mode intentionally does not register a service worker.
 
