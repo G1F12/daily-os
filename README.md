@@ -1,5 +1,7 @@
 # DAILY OS
 
+Production: https://daily-os-virid.vercel.app/
+
 A lightweight iPhone-first PWA for daily routines, day completion, streaks and weight. No backend, account, cookies or analytics. React + TypeScript + Vite; no chart or UI library.
 
 ## Run locally

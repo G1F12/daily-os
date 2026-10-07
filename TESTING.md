@@ -20,12 +20,33 @@
 - Safe-area and reduced-motion CSS declarations.
 - Worker cache installation, cleanup and shell/asset responses with networking unavailable.
 
-## Still required before release
+## Production browser acceptance — PASS
 
-Browser interaction testing of all four screens, task editor, file picker/downloads, actual browser IndexedDB reopen, horizontal overflow and safe-area rendering, real service-worker offline reload, Safari/installed iPhone behavior, and production smoke test.
+Production: https://daily-os-virid.vercel.app/ (Vercel Production / Ready).
 
-These have **not** been claimed as passing. The VM test verifies worker logic, not Safari runtime behavior. fake-indexeddb verifies persistence transactions, not a physical iPhone process restart.
+- First launch: seven Wednesday tasks, no Gym.
+- Checkbox progress: 1/7 = 14%, 5/7 = 71%, 7/7 = 100% / DAY COMPLETE.
+- Weight 76.8 kg saved; same-day edit to 76.6 kg leaves one weight entry.
+- Reload and close/reopen browser tab preserve tasks, weight and streak.
+- Current/best streak stay at one after repeated reloads.
+- Today, Progress, History and day-detail snapshot render correctly.
+- Settings: create, rename, select period, disable and delete a test routine.
+- Gym weekday editing updates its schedule; defaults restored afterward.
+- JSON downloaded and restored through the file picker and confirmation preview.
+- Settings reports Ready for offline use after service-worker installation.
+- Production manifest served correctly; production sw.js byte-identical to tested build.
+- No horizontal overflow at the available desktop viewport.
+- No application-origin errors observed; cloud-browser extension messages excluded.
+
+## Verification limits
+
+A physical iPhone/Safari, installed standalone process restart, mobile viewport overflow,
+and actual browser offline reload were not available in the cloud-browser API.
+Safe-area declarations and offline worker behavior passed static/VM tests, but these
+are not substitutes for physical-device acceptance. No claim is made that these
+physical-device checks passed.
 
 ## Release status
 
-Repository creation completed through the authorized GitHub browser session. Deployment and browser acceptance checks are in progress. This report will be updated after production verification.
+GitHub main is connected to Vercel. v1.0.0 is live in Production, not only Preview.
+Test data used above remains only in the isolated test browser, never on a server.
