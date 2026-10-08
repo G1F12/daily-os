@@ -125,3 +125,9 @@ Migration strategy: no IndexedDB version bump or database recreation. Optional g
 - Preview QA: PASS in the authenticated Vercel browser (Today/quote/Undo, same-day weight editing, Rest/Resume, Weight Goal, chart point/period, History snapshots, export/import v3, reload persistence and offline Ready). No application console errors observed; the browser extension emits unrelated metadata errors.
 - Production smoke: PASS on the existing project. The pre-upgrade v1.1 browser profile was exported as v2, updated via the actual worker's `Update available` / `Reload` flow, and re-exported as v3. Its tasks, daily records, weights and settings compared equal after excluding the new export timestamp. Today, Progress, History, Settings, checkbox/Undo, weight edit, Rest/Resume, neutral rest statistics, quote stability, manifest metadata, offline-ready status and the subsequent hotfix's worker update were checked in the production browser. The profile finished restored to its completed day.
 - External-URL Playwright smoke was unavailable from this runner (`net::ERR_EMPTY_RESPONSE` before page load); local browser E2E and visual regression remained 25/25 PASS after the final code change. This does not represent a failed application assertion or a physical iPhone test.
+
+## Reproducible Linux visual fonts
+
+Reviewed snapshots use DejaVu Sans. Chromium resolves its default Arial fallback differently when Liberation Sans is installed. CI uses .github/visual-fonts.conf to select the original fallback explicitly. Application CSS and snapshots are unchanged. Install fonts-dejavu-core, then set FONTCONFIG_FILE to the absolute path of .github/visual-fonts.conf when running npm run test:e2e.
+
+CI checks fc-match before testing, so missing fonts fail clearly. The v1.3.0 release used an approved exception for the original Actions font mismatch; that failing run was not marked as passing.

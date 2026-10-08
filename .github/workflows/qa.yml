@@ -9,6 +9,8 @@ jobs:
   qa:
     runs-on: ubuntu-24.04
     timeout-minutes: 20
+    env:
+      FONTCONFIG_FILE: ${{ github.workspace }}/.github/visual-fonts.conf
     steps:
       - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
         with:
@@ -20,10 +22,14 @@ jobs:
       - run: npm ci
       - run: python3 -m pip install Pillow
       - run: npx playwright install --with-deps chromium
+      - name: Verify baseline font fallback
+        run: |
+          sudo apt-get install -y fonts-dejavu-core
+          fc-match Arial | grep -F "DejaVu Sans"
       - run: npm test
       - run: npm run test:legacy
-      - name: Generate missing v1.3 visual references
-        run: npx playwright test v13-visual.spec.ts --project=iphone-390 --update-snapshots=missing
+      - name: Verify reviewed v1.3 visual references
+        run: npx playwright test v13-visual.spec.ts --project=iphone-390
       - name: E2E and existing visual regression
         run: npm run test:e2e
       - uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02
