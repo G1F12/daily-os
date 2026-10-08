@@ -104,3 +104,20 @@ Opening is claimed atomically once per Warsaw calendar day, after database load,
 `npm run test:legacy` builds exact production v1.2 SHA `68fcd44cc5fdd70411b98b0be93f21284bd7585f`. The E2E upgrade tests compare all legacy fields and verify empty additive Money. Six new snapshot scenarios were generated and reviewed. Existing v1.2 screenshots remain unchanged; the comparator masks only the intentional five-tab navigation and v1.3 version labels, and checks every other pixel with the established 1.5% tolerance. New Money screenshots cover the actual new navigation.
 
 The GitHub Actions workflow runs build/unit tests, the legacy fixture, mobile scenarios and visual comparison. Missing new references must be reviewed and committed before release; the first run generates them as artifacts. Do not regenerate existing v1.2 references.
+
+## v1.4.0 — Life & School (released)
+
+Adds one-time tasks, manually managed School homework/tests/projects, derived Daily Review and completed Weekly Report. The existing five bottom navigation buttons, JJK Opening, quotes and assets remain unchanged. Backups v5 import v1–v5. These notes supersede historical “release pending” wording above; v1.4 was deployed from `1a74d3ab0a24bacc9318618e547f6a895912b0f7`.
+
+## v1.5.0 — Personal Life (implementation, release QA pending)
+
+Adds four independent offline modules through **Today → More** without adding new bottom tabs: **Ideas**, **Wishlist**, **Nutrition**, and **Time Tracking**.
+
+- Ideas: create, categorize, score complexity/potential, change status and convert a saved idea into an optional one-time task without duplicate linking.
+- Wishlist: save item, optional PLN price, URL, priority and notes; “Bought” explicitly asks whether to create a Money expense, uses integer grosz and refuses a duplicate purchase. Deleting a wishlist item does not erase an existing Money transaction.
+- Nutrition: dated meal log, optional manually supplied energy/macros per portion and reusable dish presets. No external food API, assumed nutrition estimates, calorie targets or dieting prompts.
+- Time Tracking: saved Start/Pause/Resume/Stop timer, manual entries, editable notes/categories/duration for manually entered records, and Warsaw day/week reporting; resumed timers use persisted wall-clock timestamps. Timer segments crossing midnight are split by local Warsaw day.
+
+State schema and IndexedDB database version stay **1**. `State.modules` is additive, with empty lists on migration. Each change is committed using the existing atomic IndexedDB writer; backups are **v6** with validated imports **v1–v6** (and legacy raw state). Existing habits, tasks, Money, School, weight, History and quote pins must not change. The former v1.3 Opening and its static assets are intentionally untouched.
+
+**QA status:** the bundled local TypeScript syntax/transpilation check, temporary type-stub check and pure-module smoke tests ran without errors; complete `npm ci`, `npm run check`, production build, pre-existing tests, Playwright visual/mobile/offline QA, actual iPhone QA, preview verification and production smoke are **not** confirmed by the implementation package and must be performed in Codespaces before any deployment.
